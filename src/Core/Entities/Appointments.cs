@@ -6,4 +6,5 @@ public class Appointment
         public required int SpecialtyId { get; set; } 
         public required DateTime AppointmentDate { get; set; }  
         public required string Observation { get; set; }   
+        //teste
     }
