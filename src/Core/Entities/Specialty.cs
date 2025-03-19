@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 
 namespace ClinAgendaAPI
 {
-    public class Status
+    public class Specialty
     {
-         public int Id { get; set; }
+        public int Id { get; set; }
         public required string Name { get; set; }
+        public int ScheduleDuration { get; set; }
     }
 }
