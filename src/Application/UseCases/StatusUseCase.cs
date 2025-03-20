@@ -1,7 +1,7 @@
 using ClinAgenda.src.Application.DTOs.Status;
 using ClinAgenda.src.Core.Interfaces;
 
-namespace ClinAgendaAPI
+namespace ClinAgendaAPI.StatusUseCase
 {
     public class StatusUseCase
     {
@@ -20,28 +20,11 @@ namespace ClinAgendaAPI
             // Chama o repositório para obter os dados paginados e o total de registros.
             var (total, rawData) = await _statusRepository.GetAllAsync(itemsPerPage, page);
 
-            // Dicionário para armazenar os objetos StatusDTO, evitando duplicatas.
-            var specialtyDTO = new Dictionary<int, StatusDTO>();
-
-            // Itera sobre os dados retornados do repositório.
-            foreach (var item in rawData)
-            {
-                // Se o dicionário ainda não contém o status com esse ID, adiciona ao dicionário.
-                if (!specialtyDTO.ContainsKey(item.Id))
-                {
-                    specialtyDTO[item.Id] = new StatusDTO
-                    {
-                        Id = item.Id,
-                        Name = item.Name
-                    };
-                }
-            }
-
             // Retorna um objeto anônimo contendo o total de itens e a lista de status formatada.
             return new
             {
                 total,
-                items = specialtyDTO.Values.ToList()
+                items = rawData.ToList()
             };
         }
 
