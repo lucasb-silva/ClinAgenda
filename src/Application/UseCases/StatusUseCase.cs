@@ -38,14 +38,8 @@ namespace ClinAgendaAPI.StatusUseCase
         // Método assíncrono que cria um novo status e retorna o ID gerado.
         public async Task<int> CreateStatusAsync(StatusInsertDTO statusDTO)
         {
-            // Cria uma nova instância de StatusInsertDTO com os dados fornecidos.
-            var status = new StatusInsertDTO
-            {
-                Name = statusDTO.Name
-            };
-
             // Chama o repositório para inserir o novo status e obtém o ID gerado.
-            var newStatusId = await _statusRepository.InsertStatusAsync(status);
+            var newStatusId = await _statusRepository.InsertStatusAsync(statusDTO);
 
             return newStatusId; // Retorna o ID do novo status criado.
         }

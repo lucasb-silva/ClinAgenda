@@ -62,8 +62,8 @@ namespace ClinAgenda.src.WebAPI.Controllers
 
                 var createdStatus = await _statusUseCase.CreateStatusAsync(status);
                 var infosStatusCreated = await _statusUseCase.GetStatusByIdAsync(createdStatus);
-                
-                return CreatedAtAction(nameof(GetStatusByIdAsync), new { id = createdStatus }, infosStatusCreated);
+
+                return Ok(infosStatusCreated);
             }
             catch (Exception ex)
             {
