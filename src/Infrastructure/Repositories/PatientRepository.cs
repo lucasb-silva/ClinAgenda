@@ -1,11 +1,12 @@
 using System.Text;
 using ClinAgenda.src.Application.DTOs.Patient;
+using ClinAgenda.src.Core.Interfaces;
 using Dapper;
 using MySql.Data.MySqlClient;
 
 namespace ClinAgenda.src.Infrastructure.Repositories
 {
-    public class PatientRepository
+    public class PatientRepository : IPatientRepository
     {
         private readonly MySqlConnection _connection;
 
@@ -13,7 +14,8 @@ namespace ClinAgenda.src.Infrastructure.Repositories
         {
             _connection = connection;
         }
-        public async Task<PatientDTO> GetByIdAsync(int id)
+
+         public async Task<PatientDTO> GetByIdAsync(int id)
         {
             const string query = @"
                 SELECT 
@@ -30,46 +32,80 @@ namespace ClinAgenda.src.Infrastructure.Repositories
 
             return patient;
         }
-        public async Task<(int total, IEnumerable<PatientDTO> patients)> GetAllAsync(int? itemsPerPage, int? page)
+         public async Task<(int total, IEnumerable<PatientListDTO> patient)> GetPatientsAsync(string? name, string? documentNumber, int? statusId, int itemsPerPage, int page)
         {
-            var queryBase = new StringBuilder(@"
-                FROM PATIENT S WHERE 1 = 1");
+            var queryBase = new StringBuilder(@"     
+                    FROM PATIENT P
+                    INNER JOIN STATUS S ON S.ID = P.STATUSID
+                    WHERE 1 = 1");
 
             var parameters = new DynamicParameters();
 
-            var countQuery = $"SELECT COUNT(DISTINCT S.ID) {queryBase}";
+            if (!string.IsNullOrEmpty(name))
+            {
+                queryBase.Append(" AND P.NAME LIKE @Name");
+                parameters.Add("Name", $"%{name}%");
+            }
+
+            if (!string.IsNullOrEmpty(documentNumber))
+            {
+                queryBase.Append(" AND P.DOCUMENTNUMBER LIKE @DocumentNumber");
+                parameters.Add("DocumentNumber", $"%{documentNumber}%");
+            }
+
+            if (statusId.HasValue)
+            {
+                queryBase.Append(" AND S.ID = @StatusId");
+                parameters.Add("StatusId", statusId.Value);
+            }
+
+            var countQuery = $"SELECT COUNT(DISTINCT P.ID) {queryBase}";
             int total = await _connection.ExecuteScalarAsync<int>(countQuery, parameters);
 
             var dataQuery = $@"
-            SELECT ID, 
-            NAME, 
-            PHONENUMBER,
-            DOCUMENTNUMBER,
-            STATUSID,
-            BIRTHDATE
-            {queryBase}
-            LIMIT @Limit OFFSET @Offset";
+                    SELECT 
+                        P.ID, 
+                        P.NAME,
+                        P.PHONENUMBER,
+                        P.DOCUMENTNUMBER,
+                        P.BIRTHDATE ,
+                        P.STATUSID AS STATUSID, 
+                        S.NAME AS STATUSNAME
+                    {queryBase}
+                    ORDER BY P.ID
+                    LIMIT @Limit OFFSET @Offset";
 
             parameters.Add("Limit", itemsPerPage);
             parameters.Add("Offset", (page - 1) * itemsPerPage);
 
-            var patients = await _connection.QueryAsync<PatientDTO>(dataQuery, parameters);
+            var patients = await _connection.QueryAsync<PatientListDTO>(dataQuery, parameters);
 
             return (total, patients);
         }
-        public async Task<int> InsertPatientAsync(PatientInsertDTO patientInsertDTO)
+        public async Task<int> InsertPatientAsync(PatientInsertDTO patient)
         {
             string query = @"
-            INSERT INTO PATIENT (NAME, PHONENUMBER, DOCUMENTNUMBER, STATUSID, BIRTHDATE) 
-            VALUES (@Name, @Phonenumber, @Documentnumber, @Statusid, @Birthdate);
+            INSERT INTO Patient (name, phoneNumber, documentNumber, statusId, birthDate) 
+            VALUES (@Name, @PhoneNumber, @DocumentNumber, @StatusId, @BirthDate);
             SELECT LAST_INSERT_ID();";
-            return await _connection.ExecuteScalarAsync<int>(query, patientInsertDTO);
+            return await _connection.ExecuteScalarAsync<int>(query, patient);
         }
-        public async Task<int> DeletePatientAsync(int id)
+        public async Task<bool> UpdateAsync(PatientDTO patient)
         {
             string query = @"
-            DELETE FROM PATIENT
-            WHERE ID = @Id";
+            UPDATE Patient SET 
+                Name = @Name,
+                phoneNumber = @PhoneNumber,
+                documentNumber = @DocumentNumber,
+                birthDate = @BirthDate,
+                StatusId = @StatusId
+            WHERE Id = @Id;";
+            int rowsAffected = await _connection.ExecuteAsync(query, patient);
+            return rowsAffected > 0;
+        }
+        public async Task<int> DeleteByPatientIdAsync(int id)
+        {
+            string query = "DELETE FROM Patient WHERE ID = @Id";
 
             var parameters = new { Id = id };
 
