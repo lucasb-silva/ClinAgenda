@@ -42,14 +42,14 @@ namespace ClinAgenda.src.WebAPI.Controllers
                     return BadRequest("Dados inválidos para criação de especialidade.");
                 }
 
-                var createdSpecialty = await _specialtyUsecase.CreateSpecialtyAsync(specialty);
+                var createdSpecialtyId = await _specialtyUsecase.CreateSpecialtyAsync(specialty);
 
-                if (!(createdSpecialty > 0))
+                if (!(createdSpecialtyId > 0))
                 {
                     return StatusCode(500, "Erro ao criar a especialidade.");
                 }
 
-                var infosSpecialtyCreated = await _specialtyUsecase.GetSpecialtyByIdAsync(createdSpecialty);
+                var infosSpecialtyCreated = await _specialtyUsecase.GetSpecialtyByIdAsync(createdSpecialtyId);
                 return Ok(infosSpecialtyCreated);
             }
             catch (Exception ex)

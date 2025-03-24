@@ -15,7 +15,7 @@ namespace ClinAgenda.src.Infrastructure.Repositories
             _connection = connection;
         }
 
-         public async Task<PatientDTO> GetByIdAsync(int id)
+         public async Task<PatientDTO?> GetByIdAsync(int id)
         {
             const string query = @"
                 SELECT 
@@ -32,7 +32,7 @@ namespace ClinAgenda.src.Infrastructure.Repositories
 
             return patient;
         }
-         public async Task<(int total, IEnumerable<PatientListDTO> patient)> GetPatientsAsync(string? name, string? documentNumber, int? statusId, int itemsPerPage, int page)
+        public async Task<(int total, IEnumerable<PatientListDTO> patient)> GetPatientsAsync(string? name, string? documentNumber, int? statusId, int itemsPerPage, int page)
         {
             var queryBase = new StringBuilder(@"     
                     FROM PATIENT P
