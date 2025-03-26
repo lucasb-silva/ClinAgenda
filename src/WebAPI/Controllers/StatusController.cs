@@ -26,7 +26,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao buscar status: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
 
@@ -46,7 +46,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao buscar status por ID: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
 
@@ -67,7 +67,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao criar status: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
     }

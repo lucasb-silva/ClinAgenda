@@ -29,7 +29,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
         [HttpPost("insert")]
@@ -54,7 +54,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
         [HttpGet("listById/{id}")]
@@ -77,7 +77,7 @@ namespace ClinAgenda.src.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+                return StatusCode(500, $"{ex.Message}");
             }
         }
     }

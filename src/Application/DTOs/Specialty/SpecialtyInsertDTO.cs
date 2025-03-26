@@ -9,7 +9,7 @@ namespace ClinAgenda.src.Application.DTOs.Specialty
     public class SpecialtyInsertDTO
     {
         [Required(ErrorMessage = "O Nome da especialidade é obrigatório", AllowEmptyStrings = false)]
-        public string Name { get; set; }
+        public string @Name { get; set; }
         [Required(ErrorMessage = "O tempo de duração da especialidade é obrigatório", AllowEmptyStrings = false)]
         public int ScheduleDuration { get; set; }
     }

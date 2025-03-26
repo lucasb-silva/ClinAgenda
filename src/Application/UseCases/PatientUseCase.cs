@@ -46,27 +46,42 @@ namespace ClinAgenda.src.Application.UseCases
         {
             return await _patientRepository.GetByIdAsync(id);
         }
-         public async Task<bool> UpdatePatientAsync(int patientId, PatientInsertDTO patientDTO)
+        public async Task<bool> UpdatePatientAsync(int patientId, PatientInsertDTO patientDTO)
         {
-            var existingPatient = await _patientRepository.GetByIdAsync(patientId);
-            if (existingPatient == null)
-            {
-                throw new KeyNotFoundException("Paciente não encontrado.");
-            }
+            var existingPatient = await _patientRepository.GetByIdAsync(patientId) ?? throw new KeyNotFoundException("Paciente não encontrado.");
 
-            var updatedPatient = new PatientDTO
-            {
-                Id = patientId,
-                Name = patientDTO.Name,
-                PhoneNumber = patientDTO.PhoneNumber,
-                DocumentNumber = patientDTO.DocumentNumber,
-                StatusId = patientDTO.StatusId,
-                BirthDate = patientDTO.BirthDate
-            };
+            existingPatient.Name = patientDTO.Name;
+            existingPatient.PhoneNumber = patientDTO.PhoneNumber;
+            existingPatient.DocumentNumber = patientDTO.DocumentNumber;
+            existingPatient.StatusId = patientDTO.StatusId;
+            existingPatient.BirthDate = patientDTO.BirthDate;
 
-            var isUpdated = await _patientRepository.UpdateAsync(updatedPatient);
+            var isUpdated = await _patientRepository.UpdateAsync(existingPatient);
 
             return isUpdated;
         }
+        public async Task<object?> AutoComplete(string name)
+        {
+            var rawData = await _patientRepository.AutoComplete(name);
+
+            var patients = rawData
+                          .Select(p => new PatientListReturnDTO
+                          {
+                              Id = p.Id,
+                              Name = p.Name,
+                              PhoneNumber = p.PhoneNumber,
+                              DocumentNumber = p.DocumentNumber,
+                              BirthDate = p.BirthDate,
+                              Status = new StatusDTO
+                              {
+                                  Id = p.StatusId,
+                                  Name = p.StatusName
+                              }
+                          })
+                          .ToList();
+                          
+            return patients;
+        }
+
     }
 }
