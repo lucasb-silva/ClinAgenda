@@ -15,7 +15,7 @@ namespace ClinAgenda.src.Infrastructure.Repositories
             _connection = connection;
         }
 
-        public async Task<(int total, IEnumerable<DoctorListDTO> doctor)> GetPatientsAsync(string? name, int? specialtyId, int? statusId, int offset, int pageSize)
+        public async Task<(int total, IEnumerable<DoctorListDTO> doctor)> GetDoctorsAsync(string? name, int? specialtyId, int? statusId, int offset, int pageSize)
         {
             var queryBase = new StringBuilder(@"     
                     FROM DOCTOR D
