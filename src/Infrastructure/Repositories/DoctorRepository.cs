@@ -64,6 +64,23 @@ namespace ClinAgenda.src.Infrastructure.Repositories
             return (total, doctor);
         }
 
+        public async Task<IEnumerable<SpecialtyDoctorDTO>> GetDoctorSpecialtyAsync(int[] doctorIds)
+        {
+            var query = @"
+                SELECT 
+                     DS.DOCTORID AS DOCTORID,
+                     SP.ID AS SPECIALTYID,
+                     SP.NAME AS SPECIALTYNAME,
+                     SP.SCHEDULEDURATION 
+                FROM DOCTOR_SPECIALTY DS
+                INNER JOIN SPECIALTY SP ON DS.SPECIALTYID = SP.ID
+                WHERE DS.DOCTORID IN @DOCTORIDS";
+
+            var parameters = new { DoctorIds = doctorIds };
+ 
+            return await _connection.QueryAsync<SpecialtyDoctorDTO>(query, parameters);
+        }
+
 
     }
 }
