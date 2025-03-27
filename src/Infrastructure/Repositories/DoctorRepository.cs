@@ -15,9 +15,9 @@ namespace ClinAgenda.src.Infrastructure.Repositories
             _connection = connection;
         }
 
-        public async Task<(int total, IEnumerable<DoctorListDTO> doctor)> GetDoctorsAsync(string? name, int? specialtyId, int? statusId, int offset, int pageSize)
+        public async Task<IEnumerable<DoctorListDTO>> GetDoctorsAsync(string? name, int? specialtyId, int? statusId, int offset, int itemsPerPage)
         {
-            var queryBase = new StringBuilder(@"     
+            var innerJoins = new StringBuilder(@"     
                     FROM DOCTOR D
                     INNER JOIN STATUS S ON S.ID = D.STATUSID
                     INNER JOIN DOCTOR_SPECIALTY DS ON DS.DOCTORID = D.ID
@@ -27,44 +27,39 @@ namespace ClinAgenda.src.Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(name))
             {
-                queryBase.Append(" AND D.NAME LIKE @Name");
+                innerJoins.Append(" AND D.NAME LIKE @Name");
                 parameters.Add("Name", $"%{name}%");
             }
 
             if (specialtyId.HasValue)
             {
-                queryBase.Append(" AND DS.SPECIALTYID = @specialtyId");
+                innerJoins.Append(" AND DS.SPECIALTYID = @specialtyId");
                 parameters.Add("SpecialtyId", specialtyId.Value);
             }
 
             if (statusId.HasValue)
             {
-                queryBase.Append(" AND S.ID = @StatusId");
+                innerJoins.Append(" AND S.ID = @StatusId");
                 parameters.Add("StatusId", statusId.Value);
             }
 
-            var countQuery = $"SELECT COUNT(DISTINCT D.ID) {queryBase}";
-            int total = await _connection.ExecuteScalarAsync<int>(countQuery, parameters);
+            parameters.Add("LIMIT", itemsPerPage);
+            parameters.Add("OFFSET", offset);
 
-            var dataQuery = $@"
-                    SELECT 
-                        D.ID, 
-                        D.NAME,
-                        D.STATUSID AS STATUSID, 
-                        S.NAME AS STATUSNAME
-                    {queryBase}
-                    ORDER BY D.ID
-                    LIMIT @Limit OFFSET @Offset";
+            var query = $@"
+                SELECT DISTINCT
+                    D.ID AS ID,
+                    D.NAME AS NAME,
+                    S.ID AS STATUSID,
+                    S.NAME AS STATUSNAME
+                {innerJoins}
+                ORDER BY D.ID
+                LIMIT @Limit OFFSET @Offset";
 
-            parameters.Add("Limit", offset);
-            parameters.Add("Offset", (pageSize - 1) * offset);
-
-            var doctor = await _connection.QueryAsync<DoctorListDTO>(dataQuery, parameters);
-
-            return (total, doctor);
+            return await _connection.QueryAsync<DoctorListDTO>(query.ToString(), parameters);
         }
 
-        public async Task<IEnumerable<SpecialtyDoctorDTO>> GetDoctorSpecialtyAsync(int[] doctorIds)
+        public async Task<IEnumerable<SpecialtyDoctorDTO>> GetDoctorSpecialtiesAsync(int[] doctorIds)
         {
             var query = @"
                 SELECT 

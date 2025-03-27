@@ -13,6 +13,6 @@ namespace ClinAgenda.src.Application.DTOs.Patient
         [Required(ErrorMessage="O nome do Doutor é obrigatório",AllowEmptyStrings=false)]
         public required string Name { get; set; }
         [Required(ErrorMessage="O status do Doutor é obrigatório",AllowEmptyStrings=false)]
-        public required int StatusId { get; set; }
+        public int StatusId { get; set; }
     }
 }
