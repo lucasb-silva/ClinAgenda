@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ClinAgenda.src.Application.DTOs.Doctor
+namespace ClinAgenda.src.Application.DTOs.Patient
 {
-    public class DoctorDTO
+    public class PatientReturnAppointmentDTO
     {
-        public int Id { get; set; }
         public required string Name { get; set; }
-        public int StatusId { get; set; }
+        public required string documentNumber { get; set; }
     }
 }

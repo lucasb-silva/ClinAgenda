@@ -29,6 +29,7 @@ builder.Services.AddScoped<PatientUseCase>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<DoctorUseCase>();
 
+builder.Services.AddScoped<IDoctorSpecialtyRepository, DoctorSpecialtyRepository>();
 
 var app = builder.Build();
 
@@ -44,9 +45,3 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
-
-
-
-  
-
-
