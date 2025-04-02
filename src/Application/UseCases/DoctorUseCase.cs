@@ -21,19 +21,19 @@ namespace ClinAgenda.src.Application.UseCases
             _specialtyRepository = specialtyRepository;
         }
 
-        public async Task<object> GetDoctorsAsync(string? name, int? specialtyId, int? statusId, int itemsPerPage, int page)
+        public async Task<DoctorResponseDTO> GetDoctorsAsync(string? name, int? specialtyId, int? statusId, int itemsPerPage, int page)
         {
             int offset = (page - 1) * itemsPerPage;
 
-            var doctors = (await _doctorRepository.GetDoctorsAsync(name, specialtyId, statusId, offset, itemsPerPage)).ToList();
+            var rawData = await _doctorRepository.GetDoctorsAsync(name, specialtyId, statusId, offset, itemsPerPage);
 
-            if (!doctors.Any())
-                return new { total = 0, items = new List<DoctorListReturnDTO>() };
+            if (!rawData.doctors.Any())
+                return new DoctorResponseDTO { Total = 0, Items = new List<DoctorListReturnDTO>() };
 
-            var doctorIds = doctors.Select(d => d.Id).ToArray();
+            var doctorIds = rawData.doctors.Select(d => d.Id).ToArray();
             var specialties = (await _doctorRepository.GetDoctorSpecialtiesAsync(doctorIds)).ToList();
 
-            var result = doctors.Select(d => new DoctorListReturnDTO
+            var result = rawData.doctors.Select(d => new DoctorListReturnDTO
             {
                 Id = d.Id,
                 Name = d.Name,
@@ -52,10 +52,10 @@ namespace ClinAgenda.src.Application.UseCases
                     ).ToList()
             });
 
-            return new
+            return new DoctorResponseDTO
             {
-                total = result.Count(),
-                items = result.ToList()
+                Total = rawData.total,
+                Items = result.ToList()
             };
         }
         public async Task<int> CreateDoctorAsync(DoctorInsertDTO doctorDto)
